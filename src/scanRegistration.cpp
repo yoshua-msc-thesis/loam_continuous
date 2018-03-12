@@ -47,6 +47,8 @@ sensor_msgs::PointCloud2 laserCloudLast2;
 
 ros::Publisher* pubLaserCloudExtreCurPointer;
 ros::Publisher* pubLaserCloudLastPointer;
+ros::Publisher* pubLaserCloudSharpPointer;
+ros::Publisher* pubLaserCloudFlatPointer;
 
 int cloudSortInd[1200];
 int cloudNeighborPicked[1200];
@@ -580,6 +582,17 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudIn2)
     }
   }
 
+
+    sensor_msgs::PointCloud2 laserCloudSharp, laserCloudFlat;
+    pcl::toROSMsg(*cornerPointsSharp, laserCloudSharp);
+    laserCloudSharp.header.stamp = ros::Time().fromSec(timeScanCur);
+    laserCloudSharp.header.frame_id = "/camera";
+    pubLaserCloudSharpPointer->publish(laserCloudSharp);
+    pcl::toROSMsg(*surfPointsFlat, laserCloudFlat);
+    laserCloudFlat.header.stamp = ros::Time().fromSec(timeScanCur);
+    laserCloudFlat.header.frame_id = "/camera";
+    pubLaserCloudFlatPointer->publish(laserCloudFlat);
+
   pcl::PointCloud<pcl::PointXYZHSV>::Ptr surfPointsLessFlatDS(new pcl::PointCloud<pcl::PointXYZHSV>());
   pcl::VoxelGrid<pcl::PointXYZHSV> downSizeFilter;
   downSizeFilter.setInputCloud(surfPointsLessFlat);
@@ -623,7 +636,7 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudIn2)
     imuTrans->points[3].z = imuVeloFromStartZCur;
     imuTrans->points[3].v = 13;
 
-    sensor_msgs::PointCloud2 laserCloudExtreCur2;
+    sensor_msgs::PointCloud2 laserCloudExtreCur2, laserCloudSharp, laserCloudFlat;
     pcl::toROSMsg(*laserCloudExtreCur + *imuTrans, laserCloudExtreCur2);
     laserCloudExtreCur2.header.stamp = ros::Time().fromSec(timeScanCur);
     laserCloudExtreCur2.header.frame_id = "/camera";
@@ -679,7 +692,8 @@ int main(int argc, char** argv)
                                   ("/sync_scan_cloud_filtered", 2, laserCloudHandler);
 
   ros::Subscriber subImu = nh.subscribe<sensor_msgs::Imu> 
-                           ("/microstrain/imu", 5, imuHandler);
+                          //  ("/microstrain/imu", 5, imuHandler);
+                           ("/imu/data", 5, imuHandler);
 
   ros::Publisher pubLaserCloudExtreCur = nh.advertise<sensor_msgs::PointCloud2> 
                                          ("/laser_cloud_extre_cur", 2);
@@ -687,8 +701,16 @@ int main(int argc, char** argv)
   ros::Publisher pubLaserCloudLast = nh.advertise<sensor_msgs::PointCloud2> 
                                      ("/laser_cloud_last", 2);
 
+  ros::Publisher pubLaserCloudSharp = nh.advertise<sensor_msgs::PointCloud2> 
+                                     ("/laser_cloud_sharp_pts", 2);
+
+  ros::Publisher pubLaserCloudFlat = nh.advertise<sensor_msgs::PointCloud2> 
+                                     ("/laser_cloud_flat_pts", 2);
+
   pubLaserCloudExtreCurPointer = &pubLaserCloudExtreCur;
   pubLaserCloudLastPointer = &pubLaserCloudLast;
+  pubLaserCloudFlatPointer = &pubLaserCloudFlat;
+  pubLaserCloudSharpPointer = &pubLaserCloudSharp;
 
   ros::spin();
 
