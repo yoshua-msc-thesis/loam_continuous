@@ -582,6 +582,11 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudIn2)
     }
   }
 
+  pcl::PointCloud<pcl::PointXYZHSV>::Ptr surfPointsLessFlatDS(new pcl::PointCloud<pcl::PointXYZHSV>());
+  pcl::VoxelGrid<pcl::PointXYZHSV> downSizeFilter;
+  downSizeFilter.setInputCloud(surfPointsLessFlat);
+  downSizeFilter.setLeafSize(0.1, 0.1, 0.1);
+  downSizeFilter.filter(*surfPointsLessFlatDS);
 
     sensor_msgs::PointCloud2 laserCloudSharp, laserCloudFlat;
     pcl::toROSMsg(*cornerPointsSharp, laserCloudSharp);
@@ -592,12 +597,6 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudIn2)
     laserCloudFlat.header.stamp = ros::Time().fromSec(timeScanCur);
     laserCloudFlat.header.frame_id = "/camera";
     pubLaserCloudFlatPointer->publish(laserCloudFlat);
-
-  pcl::PointCloud<pcl::PointXYZHSV>::Ptr surfPointsLessFlatDS(new pcl::PointCloud<pcl::PointXYZHSV>());
-  pcl::VoxelGrid<pcl::PointXYZHSV> downSizeFilter;
-  downSizeFilter.setInputCloud(surfPointsLessFlat);
-  downSizeFilter.setLeafSize(0.1, 0.1, 0.1);
-  downSizeFilter.filter(*surfPointsLessFlatDS);
 
   *laserCloudExtreCur += *cornerPointsSharp;
   *laserCloudExtreCur += *surfPointsFlat;
@@ -701,16 +700,16 @@ int main(int argc, char** argv)
   ros::Publisher pubLaserCloudLast = nh.advertise<sensor_msgs::PointCloud2> 
                                      ("/laser_cloud_last", 2);
 
-  ros::Publisher pubLaserCloudSharp = nh.advertise<sensor_msgs::PointCloud2> 
-                                     ("/laser_cloud_sharp_pts", 2);
+    ros::Publisher pubLaserCloudSharp = nh.advertise<sensor_msgs::PointCloud2> 
+                                      ("/laser_cloud_sharp", 2);
 
-  ros::Publisher pubLaserCloudFlat = nh.advertise<sensor_msgs::PointCloud2> 
-                                     ("/laser_cloud_flat_pts", 2);
+    ros::Publisher pubLaserCloudFlat = nh.advertise<sensor_msgs::PointCloud2> 
+                                      ("/laser_cloud_flat", 2);
 
   pubLaserCloudExtreCurPointer = &pubLaserCloudExtreCur;
   pubLaserCloudLastPointer = &pubLaserCloudLast;
-  pubLaserCloudFlatPointer = &pubLaserCloudFlat;
-  pubLaserCloudSharpPointer = &pubLaserCloudSharp;
+    pubLaserCloudFlatPointer = &pubLaserCloudFlat;
+    pubLaserCloudSharpPointer = &pubLaserCloudSharp;
 
   ros::spin();
 

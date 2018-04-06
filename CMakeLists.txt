@@ -8,13 +8,12 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  pcl_conversions
+  tf
   pcl_ros
 )
 
 find_package(Eigen3 REQUIRED QUIET)
 find_package(PCL REQUIRED QUIET)
-set(OpenCV_DIR $ENV{OPENCV2_INSTALL_DIR})
 find_package(OpenCV 2 REQUIRED QUIET)
 
 include_directories(
@@ -25,13 +24,12 @@ include_directories(
 
 LIST(APPEND LINK_LIBS
   ${catkin_LIBRARIES}
-  ${PCL_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )
 
 catkin_package(
-  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs
-  DEPENDS EIGEN3 PCL OpenCV
+  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs tf pcl_ros
+  DEPENDS EIGEN3 OpenCV PCL
 )
 
 

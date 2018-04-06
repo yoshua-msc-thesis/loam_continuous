@@ -425,6 +425,7 @@ int main(int argc, char** argv)
 
   pcl::PointXYZHSV extreOri, extreSel, extreProj, tripod1, tripod2, tripod3, coeff;
 
+  ros::Rate rate(100);
   bool status = ros::ok();
   while (status) {
     ros::spinOnce();
@@ -1012,7 +1013,7 @@ int main(int argc, char** argv)
     }
 
     status = ros::ok();
-    cv::waitKey(10);
+    rate.sleep();
   }
 
   return 0;
